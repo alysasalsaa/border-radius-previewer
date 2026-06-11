@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Border Radius Previewer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #f8fafc;
+      padding: 2rem 1rem;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    /* Preview area */
+    .preview-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      min-height: 220px;
+    }
+
+    .preview-box {
+      width: 160px;
+      height: 160px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      transition: border-radius 0.2s ease;
+    }
+
+    /* Controls */
+    .controls {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .control-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .control-group .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: #0ea5e9;
+      height: 4px;
+      cursor: pointer;
+    }
+
+    .val-badge {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #0ea5e9;
+      min-width: 36px;
+      text-align: right;
+      font-family: monospace;
+    }
+
+    /* Bonus: 8-value toggle */
+    .toggle-row {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-row label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    input[type="checkbox"] {
+      accent-color: #0ea5e9;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    .extra-controls {
+      grid-column: 1 / -1;
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+
+    .extra-controls.visible {
+      display: grid;
+    }
+
+    /* CSS output */
+    .output-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .css-text {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #7dd3fc;
+      word-break: break-all;
+    }
+
+    .copy-btn {
+      flex-shrink: 0;
+      background: #0ea5e9;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .copy-btn:hover { background: #0284c7; }
+    .copy-btn:active { transform: scale(0.97); }
+    .copy-btn.copied { background: #22c55e; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div>
+      <h1>Border Radius Previewer</h1>
+      <p class="subtitle">Drag the sliders to preview CSS border-radius in real time</p>
+    </div>
+
+    <div class="preview-area">
+      <div class="preview-box" id="preview-box"></div>
+    </div>
+
+    <div class="controls" id="controls">
+
+      <div class="control-group">
+        <label>Top Left</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" value="0" id="tl" />
+          <span class="val-badge" id="tl-val">0%</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Top Right</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" value="0" id="tr" />
+          <span class="val-badge" id="tr-val">0%</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Bottom Left</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" value="0" id="bl" />
+          <span class="val-badge" id="bl-val">0%</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Bottom Right</label>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" value="0" id="br" />
+          <span class="val-badge" id="br-val">0%</span>
+        </div>
+      </div>
+
+      <!-- Bonus toggle -->
+      <div class="toggle-row">
+        <input type="checkbox" id="advanced-toggle" />
+        <label for="advanced-toggle">Enable 8-value mode (bonus)</label>
+      </div>
+
+      <!-- Extra 4 values for 8-value mode -->
+      <div class="extra-controls" id="extra-controls">
+        <div class="control-group">
+          <label>Top Left (V)</label>
+          <div class="slider-row">
+            <input type="range" min="0" max="100" value="0" id="tl2" />
+            <span class="val-badge" id="tl2-val">0%</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Top Right (V)</label>
+          <div class="slider-row">
+            <input type="range" min="0" max="100" value="0" id="tr2" />
+            <span class="val-badge" id="tr2-val">0%</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Bottom Left (V)</label>
+          <div class="slider-row">
+            <input type="range" min="0" max="100" value="0" id="bl2" />
+            <span class="val-badge" id="bl2-val">0%</span>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>Bottom Right (V)</label>
+          <div class="slider-row">
+            <input type="range" min="0" max="100" value="0" id="br2" />
+            <span class="val-badge" id="br2-val">0%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CSS output -->
+    <div class="output-box">
+      <span class="css-text" id="css-output">border-radius: 0% 0% 0% 0%;</span>
+      <button class="copy-btn" id="copy-btn">Copy CSS</button>
+    </div>
+  </div>
+
+  <script>
+    const box = document.getElementById('preview-box');
+    const cssOutput = document.getElementById('css-output');
+    const copyBtn = document.getElementById('copy-btn');
+    const advancedToggle = document.getElementById('advanced-toggle');
+    const extraControls = document.getElementById('extra-controls');
+
+    const sliders = ['tl','tr','bl','br','tl2','tr2','bl2','br2'];
+
+    function v(id) { return document.getElementById(id).value; }
+
+    function update() {
+      const tl = v('tl'), tr = v('tr'), bl = v('bl'), br = v('br');
+      const advanced = advancedToggle.checked;
+
+      let cssValue, displayCSS;
+
+      if (advanced) {
+        const tl2 = v('tl2'), tr2 = v('tr2'), bl2 = v('bl2'), br2 = v('br2');
+        cssValue = `${tl}% ${tr}% ${br}% ${bl}% / ${tl2}% ${tr2}% ${br2}% ${bl2}%`;
+        displayCSS = `border-radius: ${cssValue};`;
+      } else {
+        cssValue = `${tl}% ${tr}% ${br}% ${bl}%`;
+        displayCSS = `border-radius: ${cssValue};`;
+      }
+
+      box.style.borderRadius = cssValue;
+      cssOutput.textContent = displayCSS;
+    }
+
+    sliders.forEach(id => {
+      const slider = document.getElementById(id);
+      const badge = document.getElementById(id + '-val');
+      slider.addEventListener('input', () => {
+        badge.textContent = slider.value + '%';
+        update();
+      });
+    });
+
+    advancedToggle.addEventListener('change', () => {
+      extraControls.classList.toggle('visible', advancedToggle.checked);
+      update();
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(cssOutput.textContent).then(() => {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy CSS';
+          copyBtn.classList.remove('copied');
+        }, 1500);
+      });
+    });
+
+    update();
+  </script>
+</body>
+</html>
